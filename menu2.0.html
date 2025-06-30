@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>menu QuýNT - Pro UI</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <audio id="clickSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_378d227db3.mp3"></audio>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(circle at top left, #101010, #000000);
+      color: #ffffff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow-x: hidden;
+    }
+
+    #particles-js {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .clock {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      color: #00ffff;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      z-index: 9999;
+    }
+
+    .container, .menu-wrapper {
+      background: linear-gradient(145deg, #1f1f1f, #141414);
+      border: 2px solid #00bcd4;
+      border-radius: 20px;
+      padding: 30px;
+      width: 90%;
+      max-width: 450px;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+      margin-top: 10px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #00ffff;
+      font-weight: 600;
+      font-size: 22px;
+      margin-bottom: 25px;
+    }
+
+    .toggle, .slider-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 18px 0;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0;
+      right: 0; bottom: 0;
+      background-color: #444;
+      transition: 0.4s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+
+    .switch input:checked + .slider {
+      background-color: #00bcd4;
+    }
+
+    .switch input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 60%;
+      height: 6px;
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      border-radius: 4px;
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid #00bcd4;
+      cursor: pointer;
+      box-shadow: 0 0 6px #00bcd4;
+    }
+
+    .slider-container span:last-child {
+      width: 45px;
+      text-align: right;
+      font-weight: bold;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 25px;
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(0, 183, 255, 0.4);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 20px rgba(0, 183, 255, 0.6);
+    }
+
+    .progress-bar {
+      width: 100%;
+      background-color: #2a2a2a;
+      border-radius: 6px;
+      margin-top: 20px;
+      overflow: hidden;
+      height: 20px;
+    }
+
+    .progress {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(to right, #00c6ff, #00ffcc);
+      transition: width 0.4s ease;
+    }
+
+    .menu-wrapper {
+      position: fixed;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 640px;
+      background: #111;
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 0 30px #00ffaa;
+      border: 2px solid #00ffaa;
+      z-index: 9998;
+    }
+
+    .menu-wrapper.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(-50%) scale(0.95);
+    }
+
+    .menu-header {
+      color: #00ffaa;
+      font-size: 26px;
+      text-align: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #00ffaa;
+      padding-bottom: 10px;
+      cursor: move;
+      user-select: none;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 13px;
+      color: #aaa;
+      margin-top: 20px;
+    }
+
+    /* 🌞 LIGHT MODE */
+    body.light-mode {
+      background: #f5f5f5;
+      color: #111;
+    }
+
+    body.light-mode .container,
+    body.light-mode .menu-wrapper {
+      background: #ffffff;
+      color: #000;
+      border: 2px solid #0072ff;
+      box-shadow: 0 0 20px rgba(0, 114, 255, 0.1);
+    }
+
+    body.light-mode .menu-header {
+      color: #0072ff;
+      border-color: #0072ff;
+    }
+
+    body.light-mode button {
+      background: linear-gradient(to right, #0072ff, #00c6ff);
+      color: white;
+    }
+
+    body.light-mode .slider {
+      background-color: #ccc;
+    }
+
+    body.light-mode .switch input:checked + .slider {
+      background-color: #0072ff;
+    }
+
+    body.light-mode .progress {
+      background: linear-gradient(to right, #0072ff, #00c6ff);
+    }
+
+    #toggleTheme {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      padding: 10px 14px;
+      font-size: 16px;
+      border-radius: 50%;
+      border: none;
+      background: #00bcd4;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0,188,212,0.6);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="particles-js"></div>
+  <div id="clock" class="clock"></div>
+  <button id="toggleTheme" onclick="toggleTheme()">🌙</button>
+
+  <div id="app">
+    <div v-if="!unlocked" class="container">
+      <h2>🔐 Nhập KEY Để Mở Khóa</h2>
+      <input type="password" v-model="keyInput" placeholder="Nhập KEY..." style="width:100%; padding:10px; border-radius:8px; font-size:16px;">
+      <button @click="checkKey">🔓 Mở Khóa</button>
+    </div>
+
+    <button v-if="unlocked" class="menu-toggle-btn" @click="toggleMenu">
+      <i class="fas fa-bars"></i> MENU CHÍNH
+    </button>
+
+    <div class="menu-wrapper" :class="{ hidden: !visible }" ref="menu" @mousedown="startDrag" @mouseup="stopDrag">
+      <div class="menu-header">🎮 QuýNT MENU PRO</div>
+      <div class="menu-body">
+        <label><input type="checkbox" @click="buffMan">BUFF Màn 🎯</label><br>
+        <label><input type="checkbox" @click="noReco">NO RECOIL 🧧</label><br>
+        <label><input type="checkbox" @click="showAWM">SHOW TÂM AWM 🍀</label><br>
+        <label><input type="checkbox" @click="antenna">ĐỊNH VỊ TAY 🎄</label><br>
+        <label><input type="checkbox" @click="magic">MAGIC BULLET 🚀</label>
+      </div>
+      <div class="footer">
+        Zalo: 0326336405 <br>
+        Facebook: Nguyễn Trọng Quý (thoconvn)
+      </div>
+    </div>
+
+    <div v-if="unlocked" class="container">
+      <h2>⚙️ Menu Cài Đặt</h2>
+      <div class="toggle">
+        <span>Aim Assist</span>
+        <label class="switch">
+          <input type="checkbox" id="aimAssist" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="slider-container">
+        <span>Nhạy</span>
+        <input type="range" id="aimAssistStrength" min="0" max="2000" value="2000"
+               oninput="updateValue('aimAssistStrengthValue', this.value)">
+        <span id="aimAssistStrengthValue">2000</span>
+      </div>
+
+      <div class="toggle">
+        <span>Aim Lock</span>
+        <label class="switch">
+          <input type="checkbox" id="aimLock" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="slider-container">
+        <span>Nhẹ tâm</span>
+        <input type="range" id="aimLockRange" min="0" max="1000" value="15"
+               oninput="updateValue('aimLockRangeValue', this.value)">
+        <span id="aimLockRangeValue">15</span>
+      </div>
+
+      <button onclick="activatePanel()">🎯 Kích Hoạt Menu</button>
+
+      <div class="progress-bar">
+        <div class="progress" id="progress"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        visible: false,
+        dragging: false,
+        offsetX: 0,
+        offsetY: 0,
+        unlocked: false,
+        keyInput: ''
+      },
+      methods: {
+        toggleMenu() {
+          this.playClick();
+          this.visible = !this.visible;
+        },
+        checkKey() {
+          this.playClick();
+          if (this.keyInput === 'QuyNT-Thoconvn') {
+            this.unlocked = true;
+            alert('✅ Mở khóa thành công!');
+          } else {
+            alert('❌ Sai KEY, vui lòng thử lại.');
+          }
+        },
+        playClick() {
+          const click = document.getElementById('clickSound');
+          if (click) click.play();
+        },
+        buffMan() { this.playClick(); alert("🎯 BUFF màn đã được kích hoạt!"); },
+        noReco() { this.playClick(); alert("🧧 Đã bật NO RECOIL!"); },
+        showAWM() { this.playClick(); alert("🍀 Hiện tâm AWM."); },
+        antenna() { this.playClick(); alert("🎄 Định vị tay đã được bật."); },
+        magic() { this.playClick(); alert("🚀 Magic Bullet đang khởi động..."); },
+        startDrag(event) {
+          if (!event.target.classList.contains("menu-header")) return;
+          this.dragging = true;
+          const menu = this.$refs.menu;
+          this.offsetX = event.clientX - menu.offsetLeft;
+          this.offsetY = event.clientY - menu.offsetTop;
+          document.addEventListener('mousemove', this.onDrag);
+          document.addEventListener('mouseup', this.stopDrag);
+        },
+        onDrag(event) {
+          if (this.dragging) {
+            const menu = this.$refs.menu;
+            menu.style.left = (event.clientX - this.offsetX) + 'px';
+            menu.style.top = (event.clientY - this.offsetY) + 'px';
+          }
+        },
+        stopDrag() {
+          this.dragging = false;
+          document.removeEventListener('mousemove', this.onDrag);
+          document.removeEventListener('mouseup', this.stopDrag);
+        }
+      }
+    });
+
+    function updateValue(id, value) {
+      document.getElementById(id).innerText = value;
+    }
+
+    function activatePanel() {
+      const click = document.getElementById('clickSound');
+      if (click) click.play();
+      const progress = document.getElementById("progress");
+      let width = 0;
+      const interval = setInterval(() => {
+        if (width >= 100) {
+          clearInterval(interval);
+          alert("✅ Kích Hoạt Thành Công!");
+        } else {
+          width++;
+          progress.style.width = width + "%";
+        }
+      }, 25);
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      const btn = document.getElementById("toggleTheme");
+      body.classList.toggle("light-mode");
+      btn.textContent = body.classList.contains("light-mode") ? "☀️" : "🌙";
+    }
+
+    particlesJS('particles-js', {
+      particles: {
+        number: { value: 80 },
+        color: { value: "#00ffff" },
+        shape: { type: "circle" },
+        opacity: { value: 0.5 },
+        size: { value: 3 },
+        line_linked: {
+          enable: true,
+          distance: 150,
+          color: "#00ffff",
+          opacity: 0.4,
+          width: 1
+        },
+        move: {
+          enable: true,
+          speed: 2
+        }
+      },
+      interactivity: {
+        detect_on: "canvas",
+        events: {
+          onhover: { enable: true, mode: "repulse" }
+        }
+      }
+    });
+
+    function updateClock() {
+      const clock = document.getElementById('clock');
+      const now = new Date();
+      clock.textContent = now.toLocaleTimeString();
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
+</body>
+</html>
